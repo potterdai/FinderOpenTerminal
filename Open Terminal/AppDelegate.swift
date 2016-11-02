@@ -28,16 +28,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if let unwrappedPath = url.path {
                 if(NSFileManager.defaultManager().fileExistsAtPath(unwrappedPath)) {
 
-                    do {
-                        let rcContent = "cd \""+unwrappedPath+"\" \n" +
-                            "[ -e \"$HOME/.profile\" ] && rcFile=\"~/.profile\" || rcFile=\"/etc/profile\"\n" +
-                            "exec bash -c \"clear;printf '\\e[3J';bash --rcfile $rcFile\""
-                        
-                        try (rcContent).writeToFile("/tmp/openTerminal", atomically: true, encoding: NSUTF8StringEncoding)
-                        try NSFileManager.defaultManager().setAttributes([NSFilePosixPermissions: 0o777], ofItemAtPath: "/tmp/openTerminal")
-                            SwiftySystem.execute("/usr/bin/open", arguments: ["-b", "com.apple.terminal", "/tmp/openTerminal"])
-                    } catch _ {}
+                    let arg =   "tell application \"System Events\"\n" +
+                                // Check if Terminal.app is running
+                                    "if (application process \"Terminal\" exists) then\n" +
+                                        // if Terminal.app is running make sure it is in the foreground
+                                        "tell application \"Terminal\"\n" +
+                                            "activate\n" +
+                                        "end tell\n" +
+                                        // Open a new window in the Terminal.app by triggering ⌘+n
+                                        "tell application \"System Events\" to tell process \"Terminal\" to keystroke \"n\" using command down\n" +
+                                    "else\n" +
+                                        // If Terminal.app is not running bring it up
+                                        "tell application \"Terminal\"\n" +
+                                            "activate\n" +
+                                        "end tell\n" +
+                                    "end if\n" +
+                                "end tell\n" +
+                                // Switch to the requested directory and clear made input
+                                "tell application \"Terminal\"\n" +
+                                    // Without the delay every second request will not cd into the direcory
+                                    "delay 0.01\n" +
+                                    "do script \"cd '\(unwrappedPath)' && clear\" in window 1\n" +
+                                "end tell"
                     
+                    SwiftySystem.execute("/usr/bin/osascript", arguments: ["-e", arg])
                 } else {
                     helpMe("The specified directory does not exist")
                 }
