@@ -9,10 +9,10 @@
 import Foundation
 
 struct SwiftySystem {
-    static func execute(path: String?, arguments: [String]?) {
-        let pipe = NSPipe()
+    static func execute(_ path: String?, arguments: [String]?) {
+        let pipe = Pipe()
         
-        let task = NSTask()
+        let task = Process()
         task.launchPath = path
         task.arguments = arguments
         task.standardOutput = pipe
