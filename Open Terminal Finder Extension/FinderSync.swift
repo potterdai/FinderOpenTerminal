@@ -11,7 +11,9 @@ import FinderSync
 
 class FinderSync: FIFinderSync {
     
-    var myFolderURL: URL = URL(fileURLWithPath: "/")
+    var userFolderURL: URL = URL(fileURLWithPath: "/")
+    var workVolumeURL: URL = URL(fileURLWithPath: "/Volumes/Works")
+    var ssdVolumeURL: URL = URL(fileURLWithPath: "/Volumes/SSD")
     
     override init() {
         super.init()
@@ -20,7 +22,9 @@ class FinderSync: FIFinderSync {
         
         // Set up the directory we are syncing.
         var directoryUrls = Set<URL>();
-        directoryUrls.insert(self.myFolderURL);
+        directoryUrls.insert(self.userFolderURL);
+        directoryUrls.insert(self.workVolumeURL);
+        directoryUrls.insert(self.ssdVolumeURL);
         FIFinderSyncController.default().directoryURLs = directoryUrls;
     }
     
